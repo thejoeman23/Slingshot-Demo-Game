@@ -1,1 +1,4 @@
-# Slingshot-Demo-Game
+# 1-bit jam
+
+## Theme: tower
+ 
