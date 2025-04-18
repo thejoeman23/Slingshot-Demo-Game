@@ -1,14 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SlingManager : MonoBehaviour
+public class SlingshotController : MonoBehaviour
 {
     private GameManager _manager;
-    private SpriteRenderer _spriteRenderer;
 
-    [SerializeField] private List<Color> _colors = new List<Color>(); // All of the objects that can be slung
-    [SerializeField] private List<GameObject> _objects = new List<GameObject>(); // Colors the objects can take
-    [SerializeField] private LineRenderer _lineRenderer;
+    [SerializeField] private SlingshotVisuals _visuals;
     [SerializeField] private float _forceMultiplier = 5; // The force of the sling
     [SerializeField] private float _stretchThreshold = 1; // The minimum threshold for slinging an object
 
@@ -28,8 +25,7 @@ public class SlingManager : MonoBehaviour
 
     private void Start()
     {
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-
+        _bandPosition = _visuals.GetLineRendererPosition();
         _firstClicked = Vector2.zero;
         NextObject();
     }
@@ -40,14 +36,14 @@ public class SlingManager : MonoBehaviour
         Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition); // The current mouse position
         _direction = (mousePos - _firstClicked).normalized;
 
-        UpdateVisuals(); // Updates the visuals each frame
+        _visuals.UpdateVisuals(_bandPosition, _currentObject, _stretched); // Updates the visuals each frame
 
         // Updates the band position while the player is in the process of pulling back the slingshot
         if (Input.GetMouseButton(0) && _stretched)
         {
             float offset = Vector2.Distance(_firstClicked, mousePos);
 
-            _bandPosition = (Vector2)_lineRenderer.transform.position + (_direction * offset);
+            _bandPosition = _visuals.GetLineRendererPosition() + (_direction * offset);
         }
 
         // Detects when the player begins pulling back the sling
@@ -68,32 +64,20 @@ public class SlingManager : MonoBehaviour
             {
                 Sling(distance);
             }
+
+            _bandPosition = _visuals.GetLineRendererPosition();
         }
     }
 
     // Handles the launching of the object
     private void Sling(float extraForce)
     {
-        GameObject obj = Instantiate(_currentObject, transform.position, Quaternion.identity);
-        _currentObject.GetComponent<SpriteRenderer>().color = _spriteRenderer.color;
-        Rigidbody2D rb = obj.GetComponent<Rigidbody2D>();
+        EnableObject(_currentObject, true);
 
+        Rigidbody2D rb = _currentObject.GetComponent<Rigidbody2D>();
         rb.linearVelocity = _direction * _forceMultiplier * extraForce * -1;
 
         NextObject();
-    }
-
-    // Updates the visual band position and position of the currentObject
-    private void UpdateVisuals()
-    {
-        transform.position = _bandPosition;
-        _lineRenderer.SetPosition(1, _bandPosition);
-
-        if (!_stretched) // Resets band position and current object when the player isnt using the slingshot
-        {
-            transform.position = _lineRenderer.transform.position;
-            _bandPosition = _lineRenderer.transform.position;
-        }
     }
 
     // Updates what object is currently in the sling
@@ -102,31 +86,29 @@ public class SlingManager : MonoBehaviour
         // If no next object exists, create one
         if (_nextObject == null)
         {
-            _nextObject = SetRandomObject();
+            _nextObject = _visuals.SetRandomObject();
         }
 
         // Assign the next object to the current object
-        _currentObject = _nextObject;
-        SetObjectVisuals();
+        _currentObject = Instantiate(_nextObject, _bandPosition, Quaternion.identity);
+
+        _visuals.SetObjectVisuals(_currentObject);
+        EnableObject(_currentObject, false);
 
         // Prepare the next object
-        _nextObject = SetRandomObject();
+        _nextObject = _visuals.SetRandomObject();
     }
 
-    // Sets the current object's visuals
-    private void SetObjectVisuals()
+    // Enables or disables an objects rigidbody2D and Collider2D
+    private void EnableObject(GameObject obj, bool input)
     {
-        int random = Random.Range(0, _colors.Count);
+        Rigidbody2D rb = obj.GetComponent<Rigidbody2D>();
 
-        _spriteRenderer.sprite = _currentObject.GetComponent<SpriteRenderer>().sprite;
-        transform.localScale = _currentObject.transform.localScale;
-        _spriteRenderer.color = _colors[random];
-    }
+        if (input)
+            rb.bodyType = RigidbodyType2D.Dynamic;
+        else
+            rb.bodyType = RigidbodyType2D.Static;
 
-    // Creates a random object
-    private GameObject SetRandomObject()
-    {
-        int randomIndex = Random.Range(0, _objects.Count); // Include all elements
-        return _objects[randomIndex];
+        obj.GetComponent<Collider2D>().enabled = input;
     }
 }
