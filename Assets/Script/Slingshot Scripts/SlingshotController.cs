@@ -6,6 +6,7 @@ public class SlingshotController : MonoBehaviour
     private GameManager _manager;
 
     [SerializeField] private SlingshotVisuals _visuals;
+    [SerializeField] private SlinghsotTrajectory _trajectory;
     [SerializeField] private float _forceMultiplier = 5; // The force of the sling
     [SerializeField] private float _stretchThreshold = 1; // The minimum threshold for slinging an object
 
@@ -44,12 +45,14 @@ public class SlingshotController : MonoBehaviour
             float offset = Vector2.Distance(_firstClicked, mousePos);
 
             _bandPosition = _visuals.GetLineRendererPosition() + (_direction * offset);
+            _trajectory.CalculateTrajectory(_visuals.GetLineRendererPosition(), _direction, _forceMultiplier, offset);
         }
 
         // Detects when the player begins pulling back the sling
         if (Input.GetMouseButtonDown(0) && !_stretched)
         {
             _stretched = true;
+            _trajectory.ShowTrajectory(true);
 
             _firstClicked = mousePos;
         }
@@ -58,6 +61,8 @@ public class SlingshotController : MonoBehaviour
         if (Input.GetMouseButtonUp(0) && _stretched)
         {
             _stretched = false;
+            _trajectory.ShowTrajectory(false);
+
             float distance = Vector2.Distance(mousePos, _firstClicked);
 
             if (distance >= _stretchThreshold)
