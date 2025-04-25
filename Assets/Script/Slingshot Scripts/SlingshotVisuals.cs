@@ -8,14 +8,15 @@ public class SlingshotVisuals : MonoBehaviour
     [SerializeField] private LineRenderer _lineRenderer;
 
     // Updates the visual band position and position of the currentObject
-    public void UpdateVisuals(Vector2 bandPosition, GameObject currentObject, bool stretched)
+    public void UpdateVisuals(Slingshot slingshot)
     {
-        currentObject.transform.position = bandPosition;
-        _lineRenderer.SetPosition(1, bandPosition);
+        slingshot.currentObject.transform.position = slingshot.BandOrigin.position;
+        _lineRenderer.SetPosition(1, slingshot.BandOrigin.position);
 
-        if (!stretched) // Resets band position and current object when the player isnt using the slingshot
+        // Fix: Compare the type of the current state to IdleState using `is` instead of `==`
+        if (slingshot.currentState is IdleState) // Resets band position and current object when the player isn't using the slingshot
         {
-            currentObject.transform.position = _lineRenderer.transform.position;
+            slingshot.currentObject.transform.position = _lineRenderer.transform.position;
         }
     }
 
