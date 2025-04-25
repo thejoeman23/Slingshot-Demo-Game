@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +10,8 @@ public class SlingshotController : MonoBehaviour
     [SerializeField] private SlinghsotTrajectory _trajectory;
     [SerializeField] private float _forceMultiplier = 5; // The force of the sling
     [SerializeField] private float _stretchThreshold = 1; // The minimum threshold for slinging an object
+    [SerializeField] private float _stretchWarningThreshold = 6; // The threshold for the warning which indicates that the band is about to snap
+    [SerializeField] private float _stretchMaximum = 8; // The maximum amount the band can stretch
 
     private bool _stretched = false;
 
@@ -46,22 +49,28 @@ public class SlingshotController : MonoBehaviour
 
             _bandPosition = _visuals.GetLineRendererPosition() + (_direction * offset);
             _trajectory.CalculateTrajectory(_visuals.GetLineRendererPosition(), _direction, _forceMultiplier, offset);
+
+            if (offset >= _stretchMaximum)
+            {
+                EnableStretch(false, _firstClicked);
+            } 
+            else if (offset >= _stretchWarningThreshold)
+            {
+                Debug.Log("Enabled visual warning!");
+                // Enable visual warning
+            }
         }
 
         // Detects when the player begins pulling back the sling
         if (Input.GetMouseButtonDown(0) && !_stretched)
         {
-            _stretched = true;
-            _trajectory.ShowTrajectory(true);
-
-            _firstClicked = mousePos;
+            EnableStretch(true, mousePos);
         }
 
         // Slings the object when the player lets go
         if (Input.GetMouseButtonUp(0) && _stretched)
         {
-            _stretched = false;
-            _trajectory.ShowTrajectory(false);
+            EnableStretch(false, _firstClicked);
 
             float distance = Vector2.Distance(mousePos, _firstClicked);
 
@@ -116,4 +125,14 @@ public class SlingshotController : MonoBehaviour
 
         obj.GetComponent<Collider2D>().enabled = input;
     }
+
+    // Sets up variables and some visuals
+    private void EnableStretch(bool input, Vector2 mousePos)
+    {
+        _stretched = input;
+        _trajectory.ShowTrajectory(input);
+
+        _firstClicked = mousePos;
+    }
+
 }
