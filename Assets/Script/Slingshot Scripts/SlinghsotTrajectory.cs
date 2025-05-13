@@ -6,7 +6,7 @@ public class SlinghsotTrajectory : MonoBehaviour
 {
     [SerializeField] private GameObject _dotPrefab;
     [SerializeField] private int _resolution;
-    [Range(0.00f,0.5f)][SerializeField] private float _scalingFactor;
+    [Range(0.00f,1.0f)][SerializeField] private float _scalingFactor;
 
     private GameObject[] _points;
 
@@ -26,10 +26,8 @@ public class SlinghsotTrajectory : MonoBehaviour
         }
     }
 
-    public void CalculateTrajectory(Vector2 startPosition, Vector2 direction, float force, float forceMultiplier)
+    public void CalculateTrajectory(Vector2 startPosition, Vector2 initialVelocity)
     {
-        Vector2 initialVelocity = direction * force * forceMultiplier * _scalingFactor;
-
         // Total time until the projectile hits the ground
         float totalTime = CalculateFlightTime(initialVelocity.y);
 
@@ -47,15 +45,17 @@ public class SlinghsotTrajectory : MonoBehaviour
     // Function to calculate flight time based on initial vertical velocity
     private float CalculateFlightTime(float initialVerticalVelocity)
     {
-        // The formula to calculate the time until the object hits the ground
-        return (2 * initialVerticalVelocity);
+        float gravity = Mathf.Abs(Physics2D.gravity.y);
+        return (2 * initialVerticalVelocity) / gravity;
     }
+
 
     // Function to calculate the position of the object at a given time
     private Vector2 CalculatePositionAtTime(Vector2 startPosition, Vector2 initialVelocity, float time)
     {
+        float gravity = Physics2D.gravity.y;
+        float y = startPosition.y + initialVelocity.y * time + 0.5f * gravity * time * time;
         float x = startPosition.x + initialVelocity.x * time;
-        float y = startPosition.y + initialVelocity.y * time - 0.5f * time * time;
 
         return new Vector2(x, y);
     }
