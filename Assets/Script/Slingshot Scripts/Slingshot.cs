@@ -18,6 +18,8 @@ public class Slingshot : MonoBehaviour
 
     public ISlingshotState currentState { get; private set; }
 
+    public static event Action<GameObject> OnObjectLaunched;
+
     void Start()
     {
         ChangeState(new IdleState(this));
@@ -43,6 +45,7 @@ public class Slingshot : MonoBehaviour
 
         Rigidbody2D rb = currentObject.GetComponent<Rigidbody2D>();
         rb.linearVelocity = force * -1;
+        OnObjectLaunched?.Invoke(currentObject);
 
         SetNewObject();
     }
