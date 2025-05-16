@@ -57,7 +57,7 @@ public class Slingshot : MonoBehaviour
         EnableObjectRB(currentObject, false);
     }
 
-    private void EnableObjectRB(GameObject obj, bool input)
+    private void EnableObjectRB(GameObject obj, bool input) 
     {
         Rigidbody2D rb = obj.GetComponent<Rigidbody2D>();
 

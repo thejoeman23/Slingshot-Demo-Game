@@ -12,7 +12,7 @@ EditorBuildSettings:
     path: Assets/Scenes/BaseGame.unity
     guid: 8295243b9440eaf4186e31b36a6d97ea
   - enabled: 1
-    path: Assets/Scenes/BuildMode.unity
+    path: Assets/Scenes/Level 0.unity
     guid: c67a5a206f968bb3bb0e2d5a52163f55
   - enabled: 0
     path: Assets/Scenes/FunGameMode.unity
