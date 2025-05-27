@@ -25,7 +25,8 @@ class AimingState : ISlingshotState
         float pullDistance = Mathf.Clamp(aimDirection.magnitude, 0, _slinshot.maxPull);
         Vector2 pullVector = aimDirection.normalized * pullDistance * _slinshot.forceMultiplier;
 
-        _slinshot.Trajectory.CalculateTrajectory(_slinshot.BandOrigin.position, pullVector);
+        _slinshot.UpdateCurrentObjectPosition(aimDirection);
+        _slinshot.Trajectory.CalculateTrajectory(_slinshot.BandPosition, pullVector);
          
         // Fire on mouse release
         if (Input.GetMouseButtonUp(0))

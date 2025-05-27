@@ -11,6 +11,7 @@ public class Slingshot : MonoBehaviour
     public SlingshotVisuals Visuals;
     public SlinghsotTrajectory Trajectory;
     public Transform BandOrigin;
+    public Vector2 BandPosition;
     public float maxPull;
     public float forceMultiplier;
 
@@ -24,6 +25,8 @@ public class Slingshot : MonoBehaviour
     {
         ChangeState(new IdleState(this));
         SetNewObject();
+
+        BandPosition = BandOrigin.position;
     }
 
     void Update()
@@ -67,6 +70,13 @@ public class Slingshot : MonoBehaviour
             rb.bodyType = RigidbodyType2D.Static;
 
         obj.GetComponent<Collider2D>().enabled = input;
+    }
+
+    public void UpdateCurrentObjectPosition(Vector2 difference)
+    {
+        if (Mathf.Clamp(difference.magnitude, 0, maxPull) >= maxPull) return; // Difference is greater than the max pull
+        
+        BandPosition = (Vector2)BandOrigin.position + difference;
     }
 }
 

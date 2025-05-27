@@ -10,8 +10,16 @@ public class SlingshotVisuals : MonoBehaviour
     // Updates the visual band position and position of the currentObject
     public void UpdateVisuals(Slingshot slingshot)
     {
-        slingshot.currentObject.transform.position = slingshot.BandOrigin.position;
-        _lineRenderer.SetPosition(1, slingshot.BandOrigin.position);
+        if (slingshot.currentState is not IdleState)
+        {
+            slingshot.currentObject.transform.position = slingshot.BandPosition;
+            _lineRenderer.SetPosition(1, slingshot.BandPosition);
+        }
+        else
+        {
+            slingshot.currentObject.transform.position = slingshot.BandOrigin.position;
+            _lineRenderer.SetPosition(1, slingshot.BandOrigin.position);
+        }
 
         // Fix: Compare the type of the current state to IdleState using `is` instead of `==`
         if (slingshot.currentState is IdleState) // Resets band position and current object when the player isn't using the slingshot
